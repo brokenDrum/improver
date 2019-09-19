@@ -61,7 +61,6 @@ def main(argv=None):
 
     args = parser.parse_args(args=argv)
 
-
     # Load Cube
     cube = load_cube(args.input_filepath)
     # Process Cube
@@ -104,4 +103,3 @@ def process(cube, no_of_realizations, ecc_bounds_warning):
 
 if __name__ == '__main__':
     main()
-
