@@ -69,6 +69,7 @@ def main(argv=None):
     # Save Cube
     save_netcdf(result, args.output_filepath)
 
+
 def process(cube, no_of_realizations, ecc_bounds_warning):
     """Converts a cube into a realizations.
 
@@ -86,18 +87,15 @@ def process(cube, no_of_realizations, ecc_bounds_warning):
         cube (iris.cube.Cube):
             A processed cube.
     """
-    rebadge = True
 
     if cube.coords('percentile'):
         cube = percentiles_to_realizations.process(
             cube, no_of_percentiles=no_of_realizations,
-            rebadging=rebadge, ecc_bounds_warning=ecc_bounds_warning)
-
+            rebadging=True, ecc_bounds_warning=ecc_bounds_warning)
     elif cube.coord(var_name='threshold'):
         cube = probabilities_to_realizations.process(
-            cube, no_of_realizations=no_of_realizations, rebadging=rebadge,
+            cube, no_of_realizations=no_of_realizations, rebadging=True,
             ecc_bounds_warning=ecc_bounds_warning)
-
     elif cube.coords('height') and cube.name('wind_speed'):
         cube = extract.process(cube, 'height=10')
 
@@ -105,6 +103,5 @@ def process(cube, no_of_realizations, ecc_bounds_warning):
 
 
 if __name__ == '__main__':
-    # This is all testing data.
     main()
 
