@@ -31,35 +31,22 @@
 
 . $IMPROVER_DIR/tests/lib/utils
 
-@test "ensemble-calibration emos gaussian rebadged percentiles" {
+@test "apply-emos-coefficients when coefficients cube is wrong" {
   improver_check_skip_acceptance
-  KGO="ensemble-calibration/percentiles/kgo.nc"
 
-  # Run ensemble calibration with percentiles rebadged as realizations.
-  run improver ensemble-calibration 'K' 'gaussian' \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/rebadged_percentiles/input.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/history/*.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/truth/*.nc" \
-      "$TEST_DIR/output.nc"
-  [[ "$status" -eq 0 ]]
+  # Check value error raised when coefficients filepath does not contain
+  # a coefficients cube.
+  run improver apply-emos-coefficients \
+      "$IMPROVER_ACC_TEST_DIR/apply-emos-coefficients/gaussian/input.nc" \
+      "$IMPROVER_ACC_TEST_DIR/apply-emos-coefficients/gaussian/input.nc" \
+      "$TEST_DIR/output.nc" --random_seed 0
+  [[ "$status" -eq 1 ]]
+  # Check for error
+  read -d '' expected <<'__TEXT__' || true
+ValueError: The current coefficients cube does not have the name 'emos_coefficients'
+__TEXT__
 
-  improver_check_recreate_kgo "output.nc" $KGO
+  [[ "$output" =~ "$expected" ]]
 
-  # Run nccmp to compare the output calibrated realizations when the input
-  # is percentiles that have been rebadged as realizations. The known good
-  # output in this case is the same as when passing in percentiles directly,
-  # apart from a difference in the coordinates, such that the percentile input
-  # will have a percentile coordinate, whilst the rebadged percentile input
-  # will result in a realization coordinate.
-  # The "--exclude=realization" option indicates that the realization coordinate
-  # should be ignored.
-  # The "--exclude=percentile" option indicates that the percentile coordinate
-  # should be ignored.
-  # The "-t 1e-3" option indicates a specific absolute tolerance of 1e-3
-  # that matches the tolerance used in the
-  # improver_compare_output_lower_precision function.
-  run nccmp --exclude=realization --exclude=percentile -dNs -t 1e-3 "$TEST_DIR/output.nc" \
-      "$IMPROVER_ACC_TEST_DIR/$KGO"
-  [[ "$status" -eq 0 ]]
-  [[ "$output" =~ "are identical." ]]
+
 }

@@ -33,8 +33,8 @@ This module defines plugins used to create nowcast extrapolation forecasts.
 """
 import datetime
 import warnings
-import numpy as np
 
+import numpy as np
 from iris.coords import AuxCoord
 from iris.exceptions import CoordinateNotFoundError, InvalidCubeError
 
@@ -63,8 +63,6 @@ class AdvectField():
             vel_y (iris.cube.Cube):
                 Cube containing a 2D array of velocities along the y
                 coordinate axis
-
-        Keyword Args:
             metadata_dict (dict):
                 Dictionary containing information for amending the metadata
                 of the output cube. Please see the
@@ -164,7 +162,7 @@ class AdvectField():
                 2D float array of advected data values with masked "no data"
                 regions
         """
-        # Cater for special case where timestep (integer) is 0
+        # Cater for special case where timestep (int) is 0
         if timestep == 0:
             return data
 
@@ -354,8 +352,6 @@ class CreateExtrapolationForecast():
             vel_y (iris.cube.Cube):
                 Cube containing a 2D array of velocities along the y
                 coordinate axis
-
-        Keyword Args:
             orographic_enhancement_cube (iris.cube.Cube):
                 Cube containing the orographic enhancement fields. May have
                 data for multiple times in the cube. The orographic enhancement

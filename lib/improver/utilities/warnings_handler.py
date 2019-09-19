@@ -30,8 +30,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """Classes and functions for managing warnings in the IMPROVER code."""
 
-import warnings
 import sys
+import warnings
 
 
 class ManageWarnings(object):
@@ -46,15 +46,15 @@ class ManageWarnings(object):
         Set up a decorator with the warnings we want to ignore and what
         we want to do with any remaining warnings.
 
-        Keyword Args:
-            ignored_messages (List of strings):
+        Args:
+            ignored_messages (list of str):
                 A list of messages, one for each warning message we
                 want to ignore.
-            warning_types (List):
+            warning_types (list):
                 A list containing the Warning category for each of the
                 messages. If not provided then the Warning Category is
                 assumed to be UserWarning for each of the messages.
-            record (Boolean):
+            record (bool):
                 A flag for whether to store any warnings that are not
                 ignored. Default is False which means warnings go to
                 standard error. When set to True the warnings are

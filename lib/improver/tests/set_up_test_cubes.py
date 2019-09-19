@@ -34,17 +34,17 @@ cubes for unit tests.  Standardises time units and spatial coordinates,
 including coordinate order expected by IMPROVER plugins.
 """
 
-from cf_units import Unit, date2num
 from datetime import datetime
 
-import numpy as np
 import iris
+import numpy as np
+from cf_units import Unit, date2num
 from iris.coords import DimCoord
 from iris.exceptions import CoordinateNotFoundError
 
 from improver.grids import GLOBAL_GRID_CCRS, STANDARD_GRID_CCRS
-from improver.utilities.cube_metadata import MOSG_GRID_DEFINITION
 from improver.utilities.cube_checker import check_cube_not_float64
+from improver.utilities.cube_metadata import MOSG_GRID_DEFINITION
 from improver.utilities.temporal import forecast_period_coord
 
 TIME_UNIT = "seconds since 1970-01-01 00:00:00"
@@ -65,7 +65,7 @@ def construct_xy_coords(ypoints, xpoints, spatial_grid):
 
     Returns:
         y_coord, x_coord (tuple):
-            Tuple of iris.coord.DimCoord instances
+            Tuple of iris.coords.DimCoord instances
     """
     if spatial_grid == 'latlon':
         # make a lat-lon grid including the UK area
@@ -110,7 +110,7 @@ def construct_scalar_time_coords(time, time_bounds, frt):
 
     Returns:
         coord_dims (list):
-            List of iris.coord.DimCoord instances with the associated "None"
+            List of iris.coords.DimCoord instances with the associated "None"
             dimension (format required by iris.cube.Cube initialisation).
     """
     # generate time coordinate points
@@ -170,11 +170,9 @@ def set_up_variable_cube(data, name='air_temperature', units='K',
     - configurable attributes
 
     Args:
-        data (np.ndarray):
+        data (numpy.ndarray):
             2D (y-x ordered) or 3D (realization-y-x ordered) array of data
             to put into the cube.
-
-    Kwargs:
         name (str):
             Variable name (standard / long)
         units (str):
@@ -270,14 +268,12 @@ def set_up_percentile_cube(data, percentiles, name='air_temperature',
     - configurable attributes
 
     Args:
-        data (np.ndarray):
+        data (numpy.ndarray):
             3D (percentile-y-x ordered) array of data to put into the cube
         percentiles (list):
             List of int / float percentile values whose length must match the
             first dimension on the input data cube
-
-    Kwargs:
-        standard_name (str):
+        name (str):
             Variable standard name
         units (str):
             Variable units
@@ -286,7 +282,7 @@ def set_up_percentile_cube(data, percentiles, name='air_temperature',
             otherwise uses "projection_[x|y]_coordinate".
         time (datetime.datetime):
             Single cube validity time
-        time_bounds (tuple or list of datetime.datetime instances):
+        time_bounds (Iterable[datetime.datetime]):
             Lower and upper bound on time point, if required
         frt (datetime.datetime):
             Single cube forecast reference time
@@ -330,13 +326,11 @@ def set_up_probability_cube(data, thresholds, variable_name='air_temperature',
     "probability_of_X_above(or below)_threshold" convention
 
     Args:
-        data (np.ndarray):
+        data (numpy.ndarray):
             3D (threshold-y-x ordered) array of data to put into the cube
         thresholds (list):
             List of int / float threshold values whose length must match the
             first dimension on the input data cube
-
-    Kwargs:
         variable_name (str):
             Name of the underlying variable to which the probability field
             applies, eg "air_temperature".  NOT name of probability field.
@@ -390,7 +384,8 @@ def set_up_probability_cube(data, thresholds, variable_name='air_temperature',
 
 
 def add_coordinate(incube, coord_points, coord_name, coord_units=None,
-                   dtype=np.float32, order=None, is_datetime=False):
+                   dtype=np.float32, order=None, is_datetime=False,
+                   attributes=None):
     """
     Function to duplicate a sample cube with an additional coordinate to create
     a cubelist. The cubelist is merged to create a single cube, which can be
@@ -403,8 +398,6 @@ def add_coordinate(incube, coord_points, coord_name, coord_units=None,
             Values for the coordinate.
         coord_name (str):
             Long name of the coordinate to be added.
-
-    Kwargs:
         coord_units (str):
             Coordinate unit required.
         dtype (type):
@@ -420,6 +413,8 @@ def add_coordinate(incube, coord_points, coord_name, coord_units=None,
             list of datetime objects and need converting.  In this case the
             "coord_units" argument is overridden and the time points provided
             in seconds.  The "dtype" argument is overridden and set to int64.
+        attributes (dict):
+            Optional coordinate attributes.
 
     Returns:
         iris.cube.Cube:
@@ -448,7 +443,7 @@ def add_coordinate(incube, coord_points, coord_name, coord_units=None,
         temp_cube = cube.copy()
         temp_cube.add_aux_coord(
             DimCoord(np.array([val], dtype=dtype), long_name=coord_name,
-                     units=coord_units))
+                     units=coord_units, attributes=attributes))
 
         # recalculate forecast period if time or frt have been updated
         if is_datetime and "time" in coord_name:

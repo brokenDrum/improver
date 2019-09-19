@@ -31,21 +31,22 @@
 
 . $IMPROVER_DIR/tests/lib/utils
 
-@test "ensemble-calibration emos gaussian percentiles" {
+@test "apply-emos-coefficients when input forecast cube is a coefficients cube" {
   improver_check_skip_acceptance
-  KGO="ensemble-calibration/percentiles/kgo.nc"
+  KGO="apply-emos-coefficients/gaussian/input.nc"
 
-  # Run ensemble calibration when percentiles are input as the current forecast.
-  run improver ensemble-calibration 'K' 'gaussian' \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/percentiles/input.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/history/*.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/truth/*.nc" \
-      "$TEST_DIR/output.nc" --num_realizations=18
-  [[ "$status" -eq 0 ]]
+  # Check it raises an error when there input forecast cube is a
+  # coefficients cube.
+  run improver apply-emos-coefficients \
+  "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/kgo.nc" \
+  "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/kgo.nc" \
+      "$TEST_DIR/output.nc" --random_seed 0
+  [[ "$status" -eq 1 ]]
+  # Check for error
+  read -d '' expected <<'__TEXT__' || true
+ValueError: The current forecast cube has the name 'emos_coefficients'
+__TEXT__
 
-  improver_check_recreate_kgo "output.nc" $KGO
+  [[ "$output" =~ "$expected" ]]
 
-  # Run nccmp to compare the output calibrated percentiles and check it passes.
-  improver_compare_output_lower_precision "$TEST_DIR/output.nc" \
-      "$IMPROVER_ACC_TEST_DIR/$KGO"
 }

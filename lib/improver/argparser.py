@@ -30,9 +30,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """Common option utilities for improver CLIs."""
 
-from argparse import ArgumentParser
 import pathlib
 import sys
+from argparse import ArgumentParser
 
 from improver.profile import profile_hook_enable
 
@@ -119,7 +119,7 @@ class ArgParser(ArgumentParser):
                 ArgParser.CENTRALIZED_ARGUMENTS dictionary.
                 (For more details, see the add_arguments method).
                 Default is None, which does not add additional arguments.
-            kwargs (dictionary):
+            **kwargs:
                 Additional keyword arguments which are passed to the superclass
                 constructor (argparse.ArgumentParser), e.g: the `description`
                 of the ArgumentParser.
@@ -203,9 +203,9 @@ class ArgParser(ArgumentParser):
         groups of arguments.
 
         Args:
-            args (string):
+            args (str):
                 The incompatible arguments
-            method (string):
+            method (str):
                 The method with which the arguments are incompatible
 
         Raises:
@@ -225,7 +225,7 @@ def safe_eval(command, module, allowed):
     method without it being readily possible to trigger malicious code.
 
     Args:
-        command (string):
+        command (str):
             A string identifying the function/method/object that is to be
             returned from the provided module.
         module (module):

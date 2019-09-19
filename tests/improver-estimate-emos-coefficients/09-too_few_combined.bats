@@ -31,27 +31,15 @@
 
 . $IMPROVER_DIR/tests/lib/utils
 
-@test "ensemble-calibration emos gaussian save_mean_and_variance" {
+@test "estimate-emos-coefficients too few arguments to identify historic forecasts and truths" {
   improver_check_skip_acceptance
-  KGO_MEAN="ensemble-calibration/gaussian/kgo_mean.nc"
-  KGO_VARIANCE="ensemble-calibration/gaussian/kgo_variance.nc"
 
-  # Run ensemble calibration with saving of mean and variance and check it passes.
-  run improver ensemble-calibration 'K' 'gaussian' \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/input.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/history/*.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/truth/*.nc" \
-      "$TEST_DIR/output.nc" \
-      --save_mean "$TEST_DIR/mean.nc" \
-      --save_variance "$TEST_DIR/variance.nc"
-  [[ "$status" -eq 0 ]]
-
-  improver_check_recreate_kgo "mean.nc" $KGO_MEAN
-  improver_check_recreate_kgo "variance.nc" $KGO_VARIANCE
-
-  # Run nccmp to compare the output mean and variance and check it passes.
-  improver_compare_output_lower_precision "$TEST_DIR/mean.nc" \
-      "$IMPROVER_ACC_TEST_DIR/$KGO_MEAN"
-   improver_compare_output_lower_precision "$TEST_DIR/variance.nc" \
-      "$IMPROVER_ACC_TEST_DIR/$KGO_VARIANCE"
+  # Estimate the EMOS coefficients and check the expected warning is raised.
+  run improver estimate-emos-coefficients 'gaussian' '20170605T0300Z' "$TEST_DIR/output.nc" \
+      --combined_filepath "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/*/*.nc"
+  [[ "$status" -eq 1 ]]
+  read -d '' expected <<'__TEXT__' || true
+ValueError: All of the combined_filepath
+__TEXT__
+  [[ "$output" =~ "$expected" ]]
 }

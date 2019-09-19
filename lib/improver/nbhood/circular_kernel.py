@@ -30,17 +30,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """This module contains methods for circular neighbourhood processing."""
 
+import iris
 import numpy as np
 import scipy.ndimage.filters
-
-import iris
 
 from improver.constants import DEFAULT_PERCENTILES
 from improver.utilities.cube_checker import (
     check_cube_coordinates, find_dimension_coordinate_mismatch)
 from improver.utilities.spatial import (
     check_if_grid_is_equal_area, convert_distance_into_number_of_grid_cells)
-
 
 # Maximum radius of the neighbourhood width in grid cells.
 MAX_RADIUS_IN_GRID_CELLS = 500
@@ -52,19 +50,19 @@ def circular_kernel(fullranges, ranges, weighted_mode):
     Method to create a circular kernel.
 
     Args:
-        fullranges (Numpy.array):
+        fullranges (numpy.ndarray):
             Number of grid cells in all dimensions used to create the kernel.
             This should have the value 0 for any dimension other than x and y.
-        ranges (Tuple):
+        ranges (tuple):
             Number of grid cells in the x and y direction used to create
             the kernel.
-        weighted_mode (boolean):
+        weighted_mode (bool):
             If True, use a circle for neighbourhood kernel with
             weighting decreasing with radius.
             If False, use a circle with constant weighting.
 
     Returns:
-        kernel (Numpy.array):
+        kernel (numpy.ndarray):
             Array containing the circular smoothing kernel.
             This will have the same number of dimensions as fullranges.
 
@@ -103,18 +101,18 @@ class CircularNeighbourhood(object):
         """
         Initialise class.
 
-        Keyword Args:
-            weighted_mode (boolean):
+        Args:
+            weighted_mode (bool):
                 If True, use a circle for neighbourhood kernel with
                 weighting decreasing with radius.
                 If False, use a circle with constant weighting.
-            sum_or_fraction (string):
+            sum_or_fraction (str):
                 Identifier for whether sum or fraction should be returned from
                 neighbourhooding. The sum represents the sum of the
                 neighbourhood. The fraction represents the sum of the
                 neighbourhood divided by the neighbourhood area.
                 Valid options are "sum" or "fraction".
-            re_mask (boolean):
+            re_mask (bool):
                 If re_mask is True, the original un-neighbourhood processed
                 mask is applied to mask out the neighbourhood processed cube.
                 If re_mask is False, the original un-neighbourhood processed
@@ -145,15 +143,15 @@ class CircularNeighbourhood(object):
         order to smooth the resulting field.
 
         Args:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube containing to array to apply CircularNeighbourhood
                 processing to.
-            ranges (Tuple):
+            ranges (tuple):
                 Number of grid cells in the x and y direction used to create
                 the kernel.
 
         Returns:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube containing the smoothed field after the kernel has been
                 applied.
 
@@ -170,10 +168,11 @@ class CircularNeighbourhood(object):
         self.kernel = circular_kernel(fullranges, ranges,
                                       self.weighted_mode)
         # Smooth the data by applying the kernel.
-        if self.sum_or_fraction is "fraction":
-            total_area = np.sum(self.kernel)
-        elif self.sum_or_fraction is "sum":
+        if self.sum_or_fraction == "sum":
             total_area = 1.0
+        else:
+            # sum_or_fraction is in fraction mode
+            total_area = np.sum(self.kernel)
 
         cube.data = scipy.ndimage.filters.correlate(
             data, self.kernel, mode='nearest') / total_area
@@ -186,19 +185,17 @@ class CircularNeighbourhood(object):
         neighbourhood.
 
         Args:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube containing to array to apply CircularNeighbourhood
                 processing to.
-            radius (Float):
+            radius (float):
                 Radius in metres for use in specifying the number of
                 grid cells used to create a circular neighbourhood.
-
-        Keyword Args:
-            mask_cube (Iris.cube.Cube or None):
+            mask_cube (iris.cube.Cube or None):
                 Cube containing the array to be used as a mask.
 
         Returns:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube containing the smoothed field after the kernel has been
                 applied.
 
@@ -227,7 +224,7 @@ class GeneratePercentilesFromACircularNeighbourhood(object):
         """
         Initialise class.
 
-        Keyword Args:
+        Args:
             percentiles (list or float):
                 Percentile values at which to calculate; if not provided uses
                 DEFAULT_PERCENTILES.
@@ -252,9 +249,9 @@ class GeneratePercentilesFromACircularNeighbourhood(object):
         cube.
 
         Args:
-            slice_2d (Iris.cube.Cube):
+            slice_2d (iris.cube.Cube):
                 2d cube to be padded with a halo.
-            kernel (Numpy array):
+            kernel (numpy.ndarray):
                 Kernel used to specify the neighbourhood to consider when
                 calculating the percentiles within a neighbourhood.
 
@@ -398,18 +395,16 @@ class GeneratePercentilesFromACircularNeighbourhood(object):
         order to derive percentiles over the kernel.
 
         Args:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube containing array to apply processing to.
-            radius (Float):
+            radius (float):
                 Radius in metres for use in specifying the number of
                 grid cells used to create a circular neighbourhood.
-
-        Keyword Args:
-            mask_cube (Iris.cube.Cube or None):
+            mask_cube (iris.cube.Cube or None):
                 Cube containing the array to be used as a mask.
 
         Returns:
-            result (Iris.cube.Cube):
+            result (iris.cube.Cube):
                 Cube containing the percentile fields.
                 Has percentile as an added dimension.
 
@@ -466,10 +461,10 @@ class GeneratePercentilesFromACircularNeighbourhood(object):
         but with an added percentile dimension.
 
         Args:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube to copy meta data from.
         Returns:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube like input but with added percentiles coordinate.
                 Each slice along this coordinate is identical.
         """

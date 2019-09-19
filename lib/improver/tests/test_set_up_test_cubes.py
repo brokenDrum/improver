@@ -34,17 +34,17 @@ Unit tests for cube setup functions
 
 import unittest
 from datetime import datetime
-import numpy as np
 
 import iris
+import numpy as np
 from iris.tests import IrisTest
 
 from improver.grids import GLOBAL_GRID_CCRS, STANDARD_GRID_CCRS
-from improver.utilities.cube_checker import find_threshold_coordinate
-from improver.utilities.temporal import iris_time_to_datetime
 from improver.tests.set_up_test_cubes import (
     construct_xy_coords, construct_scalar_time_coords, set_up_variable_cube,
     set_up_percentile_cube, set_up_probability_cube, add_coordinate)
+from improver.utilities.cube_checker import find_threshold_coordinate
+from improver.utilities.temporal import iris_time_to_datetime
 
 
 class test_construct_xy_coords(IrisTest):
@@ -402,6 +402,17 @@ class test_add_coordinate(IrisTest):
             result.coord('height').points, self.height_points)
         self.assertEqual(result.coord('height').dtype, np.float32)
         self.assertEqual(result.coord('height').units, self.height_unit)
+
+    def test_adding_coordinate_with_attribute(self):
+        """Test addition of a leading height coordinate with an appropriate
+        attribute."""
+        height_attribute = {"positive": "up"}
+        result = add_coordinate(
+            self.input_cube, self.height_points, 'height',
+            coord_units=self.height_unit, attributes=height_attribute)
+        self.assertIsInstance(result, iris.cube.Cube)
+        self.assertEqual(result.coord_dims('height'), (0,))
+        self.assertEqual(result.coord('height').attributes, height_attribute)
 
     def test_reorder(self):
         """Test new coordinate can be placed in different positions"""

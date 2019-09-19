@@ -34,12 +34,12 @@
 import os
 
 from improver.argparser import ArgParser
-from improver.wind_calculations.wind_components import ResolveWindComponents
 from improver.orographic_enhancement import OrographicEnhancement
+from improver.utilities.cube_extraction import extract_subcube
+from improver.utilities.filename import generate_file_name
 from improver.utilities.load import load_cube
 from improver.utilities.save import save_netcdf
-from improver.utilities.filename import generate_file_name
-from improver.utilities.cube_extraction import extract_subcube
+from improver.wind_calculations.wind_components import ResolveWindComponents
 
 
 def load_and_extract(cube_filepath, height_value, units):
@@ -48,11 +48,11 @@ def load_and_extract(cube_filepath, height_value, units):
     If no matching level is available an error is raised.
 
     Args:
-        cube_filepath (string):
+        cube_filepath (str):
             Path to the input NetCDF file.
         height_value (float):
             The boundary height to be extracted with the input units.
-        units (string):
+        units (str):
             The units of the height level to be extracted.
     Returns:
         cube (iris.cube.Cube):
@@ -126,15 +126,11 @@ def main(argv=None):
     wind_speed = load_and_extract(args.windspeed_filepath, *constraint_info)
     wind_dir = load_and_extract(args.winddir_filepath, *constraint_info)
 
-    # resolve u and v wind components
-    uwind, vwind = ResolveWindComponents().process(wind_speed, wind_dir)
-
     # load high resolution orography
     orography = load_cube(args.orography_filepath)
 
-    # calculate orographic enhancement
-    orogenh_high_res, orogenh_standard = OrographicEnhancement().process(
-        temperature, humidity, pressure, uwind, vwind, orography)
+    orogenh_high_res, orogenh_standard = process(
+        temperature, humidity, pressure, wind_speed, wind_dir, orography)
 
     # generate file names
     fname_standard = os.path.join(
@@ -147,6 +143,46 @@ def main(argv=None):
     # save output files
     save_netcdf(orogenh_standard, fname_standard)
     save_netcdf(orogenh_high_res, fname_high_res)
+
+
+def process(temperature, humidity, pressure, wind_speed, wind_dir, orography):
+    """Calculate orograhpic enhancement
+
+    Uses the ResolveWindComponents() and OrographicEnhancement() plugins.
+    Outputs data on the high resolution orography grid and regrided to the
+    coarser resolution of the input diagnostic variables.
+
+    Args:
+        temperature (iris.cube.Cube):
+             Cube containing temperature at top of boundary layer.
+        humidity (iris.cube.Cube):
+            Cube containing relative humidity at top of boundary layer.
+        pressure (iris.cube.Cube):
+            Cube containing pressure at top of boundary layer.
+        wind_speed (iris.cube.Cube):
+            Cube containing wind speed values.
+        wind_dir (iris.cube.Cube):
+            Cube containing wind direction values relative to true north.
+        orography (iris.cube.Cube):
+            Cube containing height of orography above sea level on high
+            resolution (1 km) UKPP domain grid.
+
+    Returns:
+        (tuple): tuple containing:
+                **orogenh_high_res** (iris.cube.Cube):
+                    Precipitation enhancement due to orography in mm/h on the
+                    UK standard grid, padded with masked up np.nans where
+                    outside the UKPP domain.
+                **orogenh_standard** (iris.cube.Cube):
+                    Precipitation enhancement due to orography in mm/h on
+                    the 1km Transverse Mercator UKPP grid domain.
+    """
+    # resolve u and v wind components
+    u_wind, v_wind = ResolveWindComponents().process(wind_speed, wind_dir)
+    # calculate orographic enhancement
+    orogenh_high_res, orogenh_standard = OrographicEnhancement().process(
+        temperature, humidity, pressure, u_wind, v_wind, orography)
+    return orogenh_high_res, orogenh_standard
 
 
 if __name__ == "__main__":

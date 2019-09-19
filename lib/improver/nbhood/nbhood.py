@@ -33,11 +33,10 @@
 import iris
 import numpy as np
 
+from improver.constants import DEFAULT_PERCENTILES
 from improver.nbhood.circular_kernel import (
     CircularNeighbourhood, GeneratePercentilesFromACircularNeighbourhood)
 from improver.nbhood.square_kernel import SquareNeighbourhood
-
-from improver.constants import DEFAULT_PERCENTILES
 from improver.utilities.cube_checker import (
     check_cube_coordinates, find_dimension_coordinate_mismatch)
 from improver.utilities.cube_manipulation import concatenate_cubes
@@ -68,14 +67,12 @@ class BaseNeighbourhoodProcessing(object):
             neighbourhood_method (Class object):
                 Instance of the class containing the method that will be used
                 for the neighbourhood processing.
-            radii (float or List if defining lead times):
+            radii (float or list if defining lead times):
                 The radii in metres of the neighbourhood to apply.
                 Rounded up to convert into integer number of grid
                 points east and north, based on the characteristic spacing
                 at the zero indices of the cube projection-x and y coords.
-
-        Keyword Args:
-            lead_times (None or List):
+            lead_times (list):
                 List of lead times or forecast periods, at which the radii
                 within 'radii' are defined. The lead times are expected
                 in hours.
@@ -101,12 +98,12 @@ class BaseNeighbourhoodProcessing(object):
         Otherwise it will interpolate to find the radius at
         each cube lead time as required.
 
-        Keyword Args:
-            cube_lead_times (np.array):
+        Args:
+            cube_lead_times (numpy.ndarray):
                 Array of forecast times found in cube.
 
         Returns:
-            radii (float or np.array of float):
+            radii (float or numpy.ndarray of float):
                 Required neighbourhood sizes.
         """
         if cube_lead_times is None:
@@ -131,16 +128,14 @@ class BaseNeighbourhoodProcessing(object):
         input cube.
 
         Args:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube to apply a neighbourhood processing method to, in order to
                 generate a smoother field.
-
-        Keyword Args:
-            mask_cube (Iris.cube.Cube):
+            mask_cube (iris.cube.Cube):
                 Cube containing the array to be used as a mask.
 
         Returns:
-            cube (Iris.cube.Cube):
+            cube (iris.cube.Cube):
                 Cube after applying a neighbourhood processing method, so that
                 the resulting field is smoothed.
 
@@ -222,14 +217,12 @@ class GeneratePercentilesFromANeighbourhood(BaseNeighbourhoodProcessing):
         Args:
             neighbourhood_method (str):
                 Name of the neighbourhood method to use. Options: 'circular'.
-            radii (float or List if defining lead times):
+            radii (float or list):
                 The radii in metres of the neighbourhood to apply.
                 Rounded up to convert into integer number of grid
                 points east and north, based on the characteristic spacing
                 at the zero indices of the cube projection-x and y coords.
-
-        Keyword Args:
-            lead_times (None or List):
+            lead_times (list, optional):
                 List of lead times or forecast periods, at which the radii
                 within 'radii' are defined. The lead times are expected
                 in hours.
@@ -269,29 +262,27 @@ class NeighbourhoodProcessing(BaseNeighbourhoodProcessing):
             neighbourhood_method (str):
                 Name of the neighbourhood method to use. Options: 'circular',
                 'square'.
-            radii (float or List if defining lead times):
+            radii (float or list):
                 The radii in metres of the neighbourhood to apply.
                 Rounded up to convert into integer number of grid
                 points east and north, based on the characteristic spacing
                 at the zero indices of the cube projection-x and y coords.
-
-        Keyword Args:
-            lead_times (None or List):
+            lead_times (list):
                 List of lead times or forecast periods, at which the radii
                 within 'radii' are defined. The lead times are expected
                 in hours.
-            weighted_mode (boolean):
+            weighted_mode (bool):
                 If True, use a circle for neighbourhood kernel with
                 weighting decreasing with radius.
                 If False, use a circle with constant weighting.
-            sum_or_fraction (string):
+            sum_or_fraction (str):
                 Identifier for whether sum or fraction should be returned from
                 neighbourhooding. The sum represents the sum of the
                 neighbourhood. The fraction represents the sum of the
                 neighbourhood divided by the neighbourhood area.
                 "fraction" is the default.
                 Valid options are "sum" or "fraction".
-            re_mask (boolean):
+            re_mask (bool):
                 If re_mask is True, the original un-neighbourhood processed
                 mask is applied to mask out the neighbourhood processed cube.
                 If re_mask is False, the original un-neighbourhood processed

@@ -31,21 +31,18 @@
 
 . $IMPROVER_DIR/tests/lib/utils
 
-@test "ensemble-calibration emos gaussian probabilities" {
+@test "estimate-emos-coefficients unable to identify both historic forecasts and truths" {
   improver_check_skip_acceptance
-  KGO="ensemble-calibration/probabilities/kgo.nc"
 
-  # Run ensemble calibration when probabilities are input as the current forecast.
-  run improver ensemble-calibration 'K' 'gaussian' \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/probabilities/input.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/history/*.nc" \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/gaussian/truth/*.nc" \
-      "$TEST_DIR/output.nc" --num_realizations=18
+  # Estimate the EMOS coefficients and check the expected warning is raised.
+  run improver estimate-emos-coefficients 'gaussian' '20170605T0300Z' "$TEST_DIR/output.nc" \
+      --combined_filepath "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/truth/*.nc" \
+      --historic_forecast_identifier "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/combined_input/historic_forecast.json" \
+      --truth_identifier "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/combined_input/truth.json"
+
   [[ "$status" -eq 0 ]]
-
-  improver_check_recreate_kgo "output.nc" $KGO
-
-  # Run nccmp to compare the output calibrated probabilities and check it passes.
-  improver_compare_output_lower_precision "$TEST_DIR/output.nc" \
-      "$IMPROVER_ACC_TEST_DIR/$KGO"
+  read -d '' expected <<'__TEXT__' || true
+UserWarning: The metadata to identify the desired
+__TEXT__
+  [[ "$output" =~ "$expected" ]]
 }

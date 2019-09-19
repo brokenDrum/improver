@@ -29,22 +29,30 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-@test "ensemble-calibration no arguments" {
-  run improver ensemble-calibration
-  [[ "$status" -eq 2 ]]
-  expected="usage: improver ensemble-calibration [-h] [--profile]
-                                     [--profile_file PROFILE_FILE]
-                                     [--predictor_of_mean CALIBRATE_MEAN_FLAG]
-                                     [--save_mean MEAN_FILE]
-                                     [--save_variance VARIANCE_FILE]
-                                     [--num_realizations NUMBER_OF_REALIZATIONS]
-                                     [--random_ordering]
-                                     [--random_seed RANDOM_SEED]
-                                     [--ecc_bounds_warning]
-                                     [--max_iterations MAX_ITERATIONS]
-                                     UNITS_TO_CALIBRATE_IN DISTRIBUTION
-                                     INPUT_FILE HISTORIC_DATA_FILE
-                                     TRUTH_DATA_FILE OUTPUT_FILE
-"
+. $IMPROVER_DIR/tests/lib/utils
+
+@test "apply-emos-coefficients when no coefficients provided"  {
+  improver_check_skip_acceptance
+  KGO="apply-emos-coefficients/gaussian/input.nc"
+
+  # Apply EMOS coefficients to calibrate the input forecast
+  # and check that the calibrated forecast matches the kgo.
+  run improver apply-emos-coefficients \
+      "$IMPROVER_ACC_TEST_DIR/apply-emos-coefficients/gaussian/input.nc" \
+      "$TEST_DIR/output.nc" --random_seed 0
+  [[ "$status" -eq 0 ]]
+
+  # Check for warning
+  read -d '' expected <<'__TEXT__' || true
+UserWarning: There are no coefficients provided for calibration
+__TEXT__
+
   [[ "$output" =~ "$expected" ]]
+
+  improver_check_recreate_kgo "output.nc" $KGO
+
+  # Run nccmp to compare the output and kgo realizations and check it passes.
+  improver_compare_output_lower_precision "$TEST_DIR/output.nc" \
+      "$IMPROVER_ACC_TEST_DIR/$KGO"
+
 }

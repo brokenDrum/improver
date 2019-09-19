@@ -31,22 +31,17 @@
 """Provide support utilities for making temporal calculations."""
 
 import re
-
-from datetime import datetime
-from datetime import time as dt_time
-from datetime import timedelta
-from datetime import timezone
 import warnings
-
-import numpy as np
+from datetime import datetime, timedelta, timezone
+from datetime import time as dt_time
 
 import cf_units as unit
-from cf_units import Unit
-
 import iris
+import numpy as np
+from cf_units import Unit
 from iris import Constraint
-from iris.time import PartialDateTime
 from iris.exceptions import CoordinateNotFoundError
+from iris.time import PartialDateTime
 
 from improver.utilities.cube_manipulation import build_coordinate
 
@@ -59,7 +54,6 @@ def cycletime_to_datetime(cycletime, cycletime_format="%Y%m%dT%H%MZ"):
         cycletime (str):
             A cycletime that can be converted into a datetime using the
             cycletime_format supplied.
-    Keyword Args:
         cycletime_format (str):
             String containing the desired format for the cycletime.
     Returns:
@@ -77,7 +71,6 @@ def datetime_to_cycletime(adatetime, cycletime_format="%Y%m%dT%H%MZ"):
         adatetime (datetime.datetime):
             A datetime that can be converted into a cycletime using the
             cycletime_format supplied.
-    Keyword Args:
         cycletime_format (str):
             String containing the desired format for the cycletime.
     Returns:
@@ -98,8 +91,6 @@ def cycletime_to_number(
         cycletime (str):
             A cycletime that can be converted into a datetime using the
             cycletime_format supplied.
-
-    Keyword Args:
         cycletime_format (str):
             String containg the appropriate directives to indicate how
             the output datetime should display.
@@ -130,10 +121,8 @@ def forecast_period_coord(
     coordinate will have units of seconds.
 
     Args:
-        cube (Iris.cube.Cube):
+        cube (iris.cube.Cube):
             Cube from which the lead times will be determined.
-
-    Keyword Args:
         force_lead_time_calculation (bool):
             Force the lead time to be calculated from the
             forecast_reference_time and the time coordinate, even if
@@ -233,7 +222,7 @@ def iris_time_to_datetime(time_coord):
     Convert iris time to python datetime object. Working in UTC.
 
     Args:
-        time_coord (iris.coord.Coord):
+        time_coord (iris.coords.Coord):
             Iris time coordinate element(s).
 
     Returns:
@@ -345,11 +334,11 @@ def set_utc_offset(longitudes):
     when no more rigorous source of timeszone information is provided.
 
     Args:
-        longitudes (List):
+        longitudes (list):
             List of longitudes.
 
     Returns:
-        utc_offsets (List):
+        utc_offsets (list):
             List of utc_offsets calculated using longitude.
     """
     return np.floor((np.array(longitudes) + 7.5)/15.)
@@ -367,7 +356,7 @@ def get_forecast_times(forecast_length, forecast_date=None,
         forecast_length (int):
             An integer giving the desired length of the forecast output in
             hours (e.g. 48 for a two day forecast period).
-        forecast_date (string (YYYYMMDD)):
+        forecast_date (str):
             A string of format YYYYMMDD defining the start date for which
             forecasts are required. If unset it defaults to today in UTC.
         forecast_time (int):
@@ -376,7 +365,7 @@ def get_forecast_times(forecast_length, forecast_date=None,
             unset it defaults to the latest 6 hour cycle as a start time.
 
     Returns:
-        forecast_times (list of datetime.datetime objects):
+        forecast_times (list of datetime.datetime):
             A list of python datetime.datetime objects that represent the
             times at which diagnostic data should be extracted.
 

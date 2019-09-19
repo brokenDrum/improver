@@ -31,16 +31,16 @@
 """ Provides support utilities for cube manipulation."""
 
 import operator
-import six
 import warnings
-import numpy as np
 
 import iris
+import numpy as np
+import six
 from iris.coords import AuxCoord, DimCoord
 from iris.exceptions import CoordinateNotFoundError
 
 from improver.utilities.cube_checker import (
-    check_cube_coordinates, check_cube_not_float64, find_threshold_coordinate)
+    check_cube_coordinates, find_threshold_coordinate)
 
 
 def equalise_cube_attributes(cubes, silent=None):
@@ -51,8 +51,6 @@ def equalise_cube_attributes(cubes, silent=None):
     Args:
         cubes (iris.cube.CubeList):
             List of cubes to check the attributes and revise.
-
-    Kwargs:
         silent (list or None):
             List of attributes to remove silently if unmatched.
 
@@ -88,11 +86,11 @@ def strip_var_names(cubes):
     to help concatenation.
 
     Args:
-        cubes (Iris cubelist or Iris cube):
+        cubes (iris.cube.CubeList or iris.cube.Cube):
             Cubes to be concatenated.
 
     Returns:
-        cubes (Iris CubeList):
+        cubes (iris.cube.CubeList):
             CubeList containing original cubes without a var_name on the cube,
             or on the coordinates.
             Note: This internal function modifies the incoming cubes
@@ -126,8 +124,6 @@ class ConcatenateCubes():
         Args:
             master_coord (str):
                 Coordinate to concatenate over.
-
-        Kwargs:
             coords_to_associate (list):
                 List of coordinates to be associated with the master_coord.  If
                 master_coord is "time" this should be "forecast_reference_time"
@@ -318,7 +314,7 @@ def concatenate_cubes(
             Cubes to be concatenated.
         coords_to_slice_over (list):
             Coordinates to be sliced over.
-        master_coord (string):
+        master_coord (str):
             Coordinate that the other coordinates will be associated with.
         coordinates_for_association (list):
             List of coordinates to be associated with the master_coord.
@@ -405,10 +401,8 @@ class MergeCubes():
         result of premature iris merging on load).
 
         Args:
-            cubes (iris.cube.CubeList or iris.cube.Cube):
+            cubes_in (iris.cube.CubeList or iris.cube.Cube):
                 Cubes to be merged.
-
-        Kwargs:
             check_time_bounds_ranges (bool):
                 Flag to check whether scalar time bounds ranges match.
                 This is for when we are expecting to create a new "time" axis
@@ -456,11 +450,11 @@ def merge_cubes(cubes):
     Wrapper for MergeCubes().process()
 
     Args:
-        cubes (Iris cubelist or Iris cube):
+        cubes (iris.cube.CubeList or iris.cube.Cube):
             Cubes to be merged.
 
     Returns:
-        result (Iris cube):
+        result (iris.cube.Cube):
             Merged cube.
     """
     result = MergeCubes().process(cubes)
@@ -476,8 +470,7 @@ def get_filtered_attributes(cube, attribute_filter=None):
         cube (iris.cube.Cube):
             A cube from which attributes partially matching the
             attribute_filter will be returned.
-    Keyword Args:
-        attribute_filter (string or None):
+        attribute_filter (str or None):
             A string to match, or partially match, against attributes to build
             a filtered attribute dictionary. If None, all attributes are
             returned.
@@ -498,14 +491,13 @@ def compare_attributes(cubes, attribute_filter=None):
     Function to compare attributes of cubes
 
     Args:
-        cubes (Iris cubelist):
+        cubes (iris.cube.CubeList):
             List of cubes to compare (must be more than 1)
-    Keyword Args:
-        attribute_filter (string or None):
+        attribute_filter (str or None):
             A string to filter which attributes are actually compared. If None
             all attributes are compared.
     Returns:
-        unmatching_attributes (List):
+        unmatching_attributes (list):
             List of dictionaries of unmatching attributes
     Warns:
         Warning: If only a single cube is supplied
@@ -543,11 +535,11 @@ def compare_coords(cubes):
     Function to compare the coordinates of the cubes
 
     Args:
-        cubes (Iris cubelist):
+        cubes (iris.cube.CubeList):
             List of cubes to compare (must be more than 1)
 
     Returns:
-        unmatching_coords (List):
+        unmatching_coords (list):
             List of dictionaries of unmatching coordinates
             Number of dictionaries equals number of cubes
             unless cubes is a single cube in which case
@@ -600,35 +592,35 @@ def build_coordinate(data, long_name=None,
                      template_coord=None,
                      custom_function=None):
     """
-    Construct an iris.coord.Dim/Auxcoord using the provided options.
+    Construct an iris.coords.Dim/Auxcoord using the provided options.
 
     Args:
-        data (number/list/np.array):
+        data (int or list of numpy.ndarray):
             List or array of values to populate the coordinate points.
-        long_name (str (optional)):
+        long_name (str):
             Name of the coordinate to be built.
-        standard_name (str (optional)):
+        standard_name (str):
             CF Name of the coordinate to be built.
-        var_name (str (optional)):
+        var_name (str):
             Variable name
-        coord_type (iris.coord.AuxCoord or iris.coord.DimCoord (optional)):
+        coord_type (iris.coords.AuxCoord or iris.coords.DimCoord):
             Selection between Dim and Aux coord.
-        data_type (<type> (optional)):
+        data_type (<type>):
             The data type of the coordinate points, e.g. int
-        units (str (optional)):
+        units (str):
             String defining the coordinate units.
-        bounds (np.array (optional)):
+        bounds (numpy.ndarray):
             A (len(data), 2) array that defines coordinate bounds.
-        coord_system(iris.coord_systems.<coord_system> (optional)):
+        coord_system(iris.coord_systems.<coord_system>):
             A coordinate system in which the dimension coordinates are defined.
-        template_coord (iris.coord):
+        template_coord (iris.coords.Coord):
             A coordinate to copy.
-        custom_function (function (optional)):
+        custom_function (function):
             A function to apply to the data values before constructing the
             coordinate, e.g. np.nan_to_num.
 
     Returns:
-        crd_out(iris coordinate):
+        crd_out(iris.coords.Coord):
             Dim or Auxcoord as chosen.
 
     """
@@ -685,9 +677,9 @@ def sort_coord_in_cube(cube, coord, order="ascending"):
     Args:
         cube (iris.cube.Cube):
             The input cube to be sorted.
-        coord (string):
+        coord (str):
             Name of the coordinate to be sorted.
-        order (string):
+        order (str):
             Choice of how to order the sorted coordinate.
             Options are either "ascending" or "descending".
 
@@ -916,7 +908,7 @@ def expand_bounds(result_cube, cubelist, expanded_coords):
             A cube with metadata for the results.
         cubelist (iris.cube.CubeList):
             The list of cubes with coordinates to be combined
-        expanded_coord (dict or None):
+        expanded_coords (dict or None):
             Coordinates over which bounds should be expanded as a key, with the
             value indicating whether the upper or mid point of the coordinate
             should be used as the point value, e.g. {'time': 'upper'}.

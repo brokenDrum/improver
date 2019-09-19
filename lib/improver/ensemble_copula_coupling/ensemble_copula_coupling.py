@@ -33,12 +33,11 @@ This module defines the plugins required for Ensemble Copula Coupling.
 
 """
 import warnings
-import numpy as np
-from scipy.stats import norm
-
 
 import iris
+import numpy as np
 from iris.exceptions import CoordinateNotFoundError, InvalidCubeError
+from scipy.stats import norm
 
 from improver.ensemble_calibration.ensemble_calibration_utilities import (
     convert_cube_data_to_2d)
@@ -48,11 +47,11 @@ from improver.ensemble_copula_coupling.ensemble_copula_coupling_utilities \
             get_bounds_of_distribution,
             insert_lower_and_upper_endpoint_to_1d_array,
             restore_non_probabilistic_dimensions)
-from improver.utilities.cube_manipulation import (
-    concatenate_cubes, enforce_coordinate_ordering)
 from improver.utilities.cube_checker import (
     find_percentile_coordinate, find_threshold_coordinate,
     check_for_x_and_y_axes, check_cube_coordinates)
+from improver.utilities.cube_manipulation import (
+    concatenate_cubes, enforce_coordinate_ordering)
 from improver.utilities.indexing_operations import choose
 
 
@@ -80,8 +79,6 @@ class RebadgePercentilesAsRealizations(object):
             cube (iris.cube.Cube):
                 Cube containing a percentile coordinate, which will be
                 rebadged as ensemble realization.
-
-        Keyword Args:
             ensemble_realization_numbers (numpy.ndarray):
                 An array containing the ensemble numbers required in the output
                 realization coordinate. Default is None, meaning the
@@ -134,7 +131,7 @@ class ResamplePercentiles(object):
         """
         Initialise the class.
 
-        Keyword Args:
+        Args:
             ecc_bounds_warning (bool):
                 If true and ECC bounds are exceeded by the percentile values,
                 a warning will be generated rather than an exception.
@@ -282,8 +279,6 @@ class ResamplePercentiles(object):
         Args:
             forecast_at_percentiles (iris.cube.Cube):
                 Cube expected to contain a percentile coordinate.
-
-        Keyword Args:
             no_of_percentiles (int or None):
                 Number of percentiles
                 If None, the number of percentiles within the input
@@ -347,7 +342,7 @@ class GeneratePercentilesFromProbabilities(object):
         """
         Initialise the class.
 
-        Keyword Args:
+        Args:
             ecc_bounds_warning (bool):
                 If true and ECC bounds are exceeded by the percentile values,
                 a warning will be generated rather than an exception.
@@ -547,15 +542,13 @@ class GeneratePercentilesFromProbabilities(object):
         Args:
             forecast_probabilities (iris.cube.Cube):
                 Cube containing a threshold coordinate.
-
-        Keyword Args:
             no_of_percentiles (int):
                 Number of percentiles. If None and percentiles is not set,
                 the number of thresholds within the input
                 forecast_probabilities cube is used as the number of
                 percentiles. This argument is mutually exclusive with
                 percentiles.
-            percentiles (list of floats):
+            percentiles (list of float):
                 The desired percentile values in the interval [0, 100].
                 This argument is mutually exclusive with no_of_percentiles.
             sampling (str):
@@ -739,8 +732,6 @@ class GeneratePercentilesFromMeanAndVariance(object):
                 Cube containing the calibrated forecast predictor.
             calibrated_forecast_variance (iris.cube.Cube):
                 Cube containing the calibrated forecast variance.
-
-        Keyword Args:
             no_of_percentiles (int):
                 Integer defining the number of percentiles that will be
                 calculated from the mean and variance.
@@ -1036,8 +1027,6 @@ class EnsembleReordering(object):
                 Cube containing the raw (not post-processed) forecasts.
                 The probabilistic dimension is assumed to be the zeroth
                 dimension.
-
-        Keyword Args:
             random_ordering (bool):
                 If random_ordering is True, the post-processed forecasts are
                 reordered randomly, rather than using the ordering of the
@@ -1105,8 +1094,6 @@ class EnsembleReordering(object):
             raw_forecast (iris.cube.Cube):
                 The cube containing the raw (not post-processed)
                 forecast.
-
-        Keyword Args:
             random_ordering (bool):
                 If random_ordering is True, the post-processed forecasts are
                 reordered randomly, rather than using the ordering of the

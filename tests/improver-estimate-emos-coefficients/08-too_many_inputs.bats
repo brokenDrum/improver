@@ -29,13 +29,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-@test "gradient calculation no arguments" {
-  run improver gradient
-  [[ "$status" -eq 2 ]]
+. $IMPROVER_DIR/tests/lib/utils
+
+@test "estimate-emos-coefficients too many inputs provided" {
+  improver_check_skip_acceptance
+
+  # Estimate the EMOS coefficients and check the expected warning is raised.
+  run improver estimate-emos-coefficients 'gaussian' '20170605T0300Z' "$TEST_DIR/output.nc" \
+      --historic_filepath "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/history/*.nc" \
+      --truth_filepath "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/truth/*.nc" \
+      --combined_filepath "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/*/*.nc"
+  [[ "$status" -eq 1 ]]
   read -d '' expected <<'__TEXT__' || true
-usage: improver gradient [-h] [--profile] [--profile_file PROFILE_FILE]
-                         [--force]
-                         INPUT_FILE OUTPUT_FILE
+ValueError: If the historic_filepath and truth_filepath arguments
 __TEXT__
   [[ "$output" =~ "$expected" ]]
 }

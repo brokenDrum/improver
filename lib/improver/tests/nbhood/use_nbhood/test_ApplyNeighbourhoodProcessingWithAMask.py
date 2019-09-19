@@ -30,13 +30,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """Unit tests for nbhood.ApplyNeighbourhoodProcessingWithAMask."""
 
-from collections import OrderedDict
 import unittest
+from collections import OrderedDict
 
 import iris
-from iris.tests import IrisTest
-from iris.coords import DimCoord
 import numpy as np
+from iris.coords import DimCoord
+from iris.tests import IrisTest
 
 from improver.nbhood.use_nbhood import ApplyNeighbourhoodProcessingWithAMask
 from improver.tests.nbhood.nbhood.test_BaseNeighbourhoodProcessing import (
@@ -51,7 +51,7 @@ def add_dimensions_to_cube(cube, new_dims):
     Args:
         cube (iris.cube.Cube):
             The cube we want to add dimensions to.
-        new_dims (dictionary):
+        new_dims (dict):
             A dictionary containing the names of the dimensions you want to
             add and the number of points you want in that dimension.
             e.g {"threshold": 3, "realization": 4}

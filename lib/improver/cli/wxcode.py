@@ -31,18 +31,19 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """CLI to generate weather symbols."""
 
-from improver.argparser import ArgParser
 import argparse
-import numpy as np
 from argparse import RawTextHelpFormatter
 
+import numpy as np
+
+from improver.argparser import ArgParser
+from improver.utilities.load import load_cubelist
+from improver.utilities.save import save_netcdf
 from improver.wxcode.weather_symbols import WeatherSymbols
-from improver.wxcode.wxcode_utilities import expand_nested_lists
 from improver.wxcode.wxcode_decision_tree import wxcode_decision_tree
 from improver.wxcode.wxcode_decision_tree_global import (
     wxcode_decision_tree_global)
-from improver.utilities.load import load_cubelist
-from improver.utilities.save import save_netcdf
+from improver.wxcode.wxcode_utilities import expand_nested_lists
 
 
 def interrogate_decision_tree(wxtree):
@@ -135,8 +136,8 @@ def main(argv=None):
 
     args = parser.parse_args(args=argv)
 
+    # Load Cube
     cubes = load_cubelist(args.input_filepaths, no_lazy_load=True)
-
     required_number_of_inputs = n_files
     if args.wxtree == 'global':
         required_number_of_inputs = n_files_global
@@ -146,8 +147,32 @@ def main(argv=None):
                                        required_number_of_inputs)
         raise argparse.ArgumentTypeError(msg)
 
-    result = (WeatherSymbols(wxtree=args.wxtree).process(cubes))
+    # Process Cube
+    result = process(cubes, args.wxtree)
+
+    # Save Cube
     save_netcdf(result, args.output_filepath)
+
+
+def process(cubes, wxtree='high_resolution'):
+    """ Processes cube for Weather symbols.
+
+    Args:
+        cubes (iris.cube.Cubelist):
+            A cubelist containing the diagnostics required for the
+            weather symbols decision tree, these at co-incident times.
+        wxtree (str):
+            Weather Code tree.
+            Choices are high_resolution or global.
+            Default is 'high_resolution'.
+
+    Returns:
+        result (iris.cube.Cube):
+            A cube of weather symbols.
+
+    """
+    result = WeatherSymbols(wxtree=wxtree).process(cubes)
+    return result
 
 
 if __name__ == "__main__":

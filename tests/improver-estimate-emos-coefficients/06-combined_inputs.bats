@@ -29,27 +29,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-@test "gradient -h" {
-  run improver gradient -h
+. $IMPROVER_DIR/tests/lib/utils
+
+@test "estimate-emos-coefficients for combined historic forecasts and truths" {
+  improver_check_skip_acceptance
+  KGO="estimate-emos-coefficients/gaussian/kgo.nc"
+
+  # Estimate the EMOS coefficients and check that they match the kgo.
+  run improver estimate-emos-coefficients 'gaussian' '20170605T0300Z' "$TEST_DIR/output.nc" \
+      --combined_filepath "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/*/*.nc" \
+      --historic_forecast_identifier "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/combined_input/historic_forecast.json" \
+      --truth_identifier "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/combined_input/truth.json"
   [[ "$status" -eq 0 ]]
-  read -d '' expected <<'__HELP__' || true
-usage: improver gradient [-h] [--profile] [--profile_file PROFILE_FILE]
-                         [--force]
-                         INPUT_FILE OUTPUT_FILE
 
-Read the input field, and calculate the gradient in x and y directions.
+  improver_check_recreate_kgo "output.nc" $KGO
 
-positional arguments:
-  INPUT_FILE            A path to an input NetCDF file to be processed
-  OUTPUT_FILE           The output path for the processed NetCDF
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --profile             Switch on profiling information.
-  --profile_file PROFILE_FILE
-                        Dump profiling info to a file. Implies --profile.
-  --force               If True, ancillaries will be generated even if doing
-                        so will overwrite existing files.
-__HELP__
-  [[ "$output" == "$expected" ]]
+  # Run nccmp to compare the output and kgo realizations and check it passes.
+  improver_compare_output_lower_precision "$TEST_DIR/output.nc" \
+      "$IMPROVER_ACC_TEST_DIR/$KGO"
 }

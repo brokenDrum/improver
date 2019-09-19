@@ -31,9 +31,9 @@
 
 """Apply temperature lapse rate adjustments to a spot data cube."""
 
+import iris
 import numpy as np
 
-import iris
 from improver.spotdata.spot_extraction import (SpotExtraction,
                                                check_grid_match)
 
@@ -47,7 +47,7 @@ class SpotLapseRateAdjust:
 
     def __init__(self, neighbour_selection_method='nearest'):
         """
-        Keyword Args:
+        Args:
             neighbour_selection_method (str):
                 The neighbour cube may contain one or several sets of grid
                 coordinates that match a spot site. These are determined by

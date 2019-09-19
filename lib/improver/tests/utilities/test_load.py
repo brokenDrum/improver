@@ -36,18 +36,15 @@ from subprocess import call as Call
 from tempfile import mkdtemp
 
 import iris
-from iris.coords import DimCoord
-from iris.tests import IrisTest
-from iris.exceptions import ConstraintMismatchError
 import numpy as np
-
-from improver.utilities.load import load_cube, load_cubelist
-from improver.utilities.save import save_netcdf
-from improver.utilities.cube_checker import find_threshold_coordinate
+from iris.tests import IrisTest
 
 from improver.tests.set_up_test_cubes import (
     set_up_variable_cube, set_up_percentile_cube, set_up_probability_cube,
     add_coordinate)
+from improver.utilities.cube_checker import find_threshold_coordinate
+from improver.utilities.load import load_cube, load_cubelist
+from improver.utilities.save import save_netcdf
 
 
 class Test_load_cube(IrisTest):
@@ -219,6 +216,16 @@ class Test_load_cube(IrisTest):
         """Test that the loading works correctly with lazy loading."""
         result = load_cube(self.filepath)
         self.assertTrue(result.has_lazy_data())
+
+    def test_none_file_with_allow_none(self):
+        """Test that with None as filepath and allow_none, it returns None."""
+        self.assertIsNone(load_cube(None, allow_none=True))
+
+    def test_none_file_without_allow_none(self):
+        """Test that with None as filepath and without allow_none,
+         it raises a TypeError."""
+        with self.assertRaises(TypeError):
+            load_cube(None)
 
 
 class Test_load_cubelist(IrisTest):

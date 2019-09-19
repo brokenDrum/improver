@@ -32,10 +32,10 @@
 
 import numpy as np
 
+from improver.utilities.cube_manipulation import concatenate_cubes
 from improver.utilities.temporal import (
     unify_forecast_reference_time, cycletime_to_datetime,
     find_latest_cycletime)
-from improver.utilities.cube_manipulation import concatenate_cubes
 
 
 class GenerateTimeLaggedEnsemble(object):
@@ -49,7 +49,7 @@ class GenerateTimeLaggedEnsemble(object):
         """
         Initialise class.
 
-        Keyword Args:
+        Args:
             cycletime (str):
                 A string of form YYYYMMDDTHHMMZ describing the
                 forecast_reference_time we want the resulting cube to be

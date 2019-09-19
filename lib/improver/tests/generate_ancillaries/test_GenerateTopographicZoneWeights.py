@@ -32,11 +32,11 @@
 
 import unittest
 
-from cf_units import Unit
 import iris
+import numpy as np
+from cf_units import Unit
 from iris.exceptions import InvalidCubeError
 from iris.tests import IrisTest
-import numpy as np
 
 from improver.generate_ancillaries.generate_topographic_zone_weights import (
     GenerateTopographicZoneWeights)
@@ -50,7 +50,7 @@ def set_up_orography_cube(data):
     setup utility but removing all time coordinates
 
     Args:
-        data (np.array):
+        data (numpy.ndarray):
             Orography data to populate the cube
     """
     orography = set_up_variable_cube(

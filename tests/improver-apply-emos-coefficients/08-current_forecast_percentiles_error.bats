@@ -35,12 +35,12 @@
   improver_check_skip_acceptance
   # Run apply-emos-coefficients when percentiles are input as the current forecast.
   run improver apply-emos-coefficients \
-      "$IMPROVER_ACC_TEST_DIR/ensemble-calibration/percentiles/input.nc" \
+      "$IMPROVER_ACC_TEST_DIR/apply-emos-coefficients/percentiles/input.nc" \
       "$IMPROVER_ACC_TEST_DIR/estimate-emos-coefficients/gaussian/kgo.nc" \
       "$TEST_DIR/output.nc"
   [[ "$status" -eq 1 ]]
   read -d '' expected <<'__TEXT__' || true
-ValueError: The current forecast has been provided as percentiles. These percentiles need to be converted to realizations for ensemble calibration. The args.num_realizations argument is used to define the number of realizations to construct from the input percentiles, so if the current forecast is provided as percentiles then args.num_realizations must be defined.
+ValueError: The current forecast has been provided as percentiles. These percentiles need to be converted to realizations for ensemble calibration. The num_realizations argument is used to define the number of realizations to construct from the input percentiles, so if the current forecast is provided as percentiles then num_realizations must be defined.
 __TEXT__
   [[ "$output" =~ "$expected" ]]
 }

@@ -30,13 +30,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """Module containing plugin for CubeCombiner."""
 
+import iris
 import numpy as np
 
-import iris
-
+from improver.utilities.cube_manipulation import expand_bounds
 from improver.utilities.cube_metadata import (
     resolve_metadata_diff, amend_metadata)
-from improver.utilities.cube_manipulation import expand_bounds
 
 
 class CubeCombiner(object):
@@ -52,7 +51,6 @@ class CubeCombiner(object):
         Args:
             operation (str):
                 Operation (+, - etc) to apply to the incoming cubes.
-        Keyword Args:
             warnings_on (bool):
                 If True output warnings for mismatching metadata.
 
@@ -119,7 +117,6 @@ class CubeCombiner(object):
                 Cube List contain the cubes to combine.
             new_diagnostic_name (str):
                 New name for the combined diagnostic.
-        Keyword Args:
             revised_coords (dict or None):
                 Revised coordinates for combined cube.
             revised_attributes (dict or None):

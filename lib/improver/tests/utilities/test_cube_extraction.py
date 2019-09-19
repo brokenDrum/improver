@@ -31,12 +31,12 @@
 """ Unit tests for cube extraction utilities """
 
 import unittest
-import numpy as np
 
 import iris
-from iris.tests import IrisTest
+import numpy as np
 from iris.coords import DimCoord
 from iris.exceptions import CoordinateNotFoundError
+from iris.tests import IrisTest
 
 from improver.utilities.cube_checker import find_threshold_coordinate
 from improver.utilities.cube_extraction import (
@@ -236,7 +236,7 @@ class Test_apply_extraction(IrisTest):
         with self.assertRaises(CoordinateNotFoundError):
             apply_extraction(self.precip_cube, constraint_dict, units_dict)
 
-    def test_return_none(self):
+    def test_allow_none(self):
         """ Test function returns None rather than raising an error where
         no subcubes match the required constraints, when unit conversion is
         required """

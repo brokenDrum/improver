@@ -30,32 +30,28 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """Unit tests for weather code utilities."""
 
+import datetime
 import unittest
 from subprocess import call as Call
 from tempfile import mkdtemp
-import datetime
-
-import numpy as np
-
 
 import iris
-from iris.cube import Cube
-from iris.tests import IrisTest
-from iris.coords import DimCoord
-from iris.exceptions import CoordinateNotFoundError
-
+import numpy as np
 from cf_units import Unit, date2num
+from iris.coords import DimCoord
+from iris.cube import Cube
+from iris.exceptions import CoordinateNotFoundError
+from iris.tests import IrisTest
 
+from improver.grids import STANDARD_GRID_CCRS, ELLIPSOID
+from improver.tests.ensemble_calibration.ensemble_calibration. \
+    helper_functions import set_up_cube
 from improver.utilities.load import load_cube
 from improver.utilities.save import save_netcdf
-from improver.grids import STANDARD_GRID_CCRS, ELLIPSOID
-
 from improver.wxcode.wxcode_utilities import (WX_DICT,
                                               add_wxcode_metadata,
                                               expand_nested_lists,
                                               update_daynight)
-from improver.tests.ensemble_calibration.ensemble_calibration. \
-    helper_functions import set_up_cube
 
 
 def datetime_to_numdateval(year=2018, month=9, day=12, hour=5, minutes=43):
@@ -93,11 +89,11 @@ def set_up_wxcube(time_points=None):
     Set up a wxcube
 
     Args:
-        time_points (np.ndarray):
+        time_points (numpy.ndarray):
            Array of time points
 
     Returns:
-        cube (Iris.cube.Cube):
+        cube (iris.cube.Cube):
             cube of weather codes set to 1
             data shape (time_points, 16, 16)
             grid covers 0 to 30km west of origin and
@@ -155,11 +151,11 @@ def set_up_wxcube_lat_lon(time_points=None):
     Set up a lat-lon wxcube
 
     Args:
-        time_points (np.ndarray):
+        time_points (numpy.ndarray):
            Array of time points
 
     Returns:
-        cube (Iris.cube.Cube):
+        cube (iris.cube.Cube):
             lat lon cube of weather codes set to 1
             data shape (time_points, 16, 16)
             grid covering 8W to 7E, 49N to 64N

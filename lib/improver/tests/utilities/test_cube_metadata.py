@@ -34,12 +34,13 @@ import unittest
 from copy import copy, deepcopy
 from datetime import datetime as dt
 
-import numpy as np
-
 import iris
+import numpy as np
 from iris.cube import Cube
 from iris.tests import IrisTest
 
+from improver.tests.set_up_test_cubes import (
+    set_up_variable_cube, set_up_probability_cube, add_coordinate)
 from improver.utilities.cube_checker import find_threshold_coordinate
 from improver.utilities.cube_metadata import (
     add_coord,
@@ -56,9 +57,6 @@ from improver.utilities.cube_metadata import (
     generate_hash,
     create_coordinate_hash)
 from improver.utilities.warnings_handler import ManageWarnings
-
-from improver.tests.set_up_test_cubes import (
-    set_up_variable_cube, set_up_probability_cube, add_coordinate)
 
 
 def create_cube_with_threshold(data=None, threshold_values=None):
@@ -851,6 +849,14 @@ class Test_in_vicinity_name_format(IrisTest):
         self.assertEqual(new_name_above, correct_name_above)
         self.assertEqual(new_name_below, correct_name_below)
 
+    def test_between_thresholds(self):
+        """Test for "between_thresholds" suffix"""
+        self.cube.rename('probability_of_visibility_between_thresholds')
+        correct_name = (
+            'probability_of_visibility_in_vicinity_between_thresholds')
+        new_name = in_vicinity_name_format(self.cube.name())
+        self.assertEqual(new_name, correct_name)
+
     def test_no_above_below_threshold(self):
         """Test the case of name without above/below_threshold is handled
         correctly"""
@@ -863,9 +869,8 @@ class Test_in_vicinity_name_format(IrisTest):
     def test_in_vicinity_already_exists(self):
         """Test the case of 'in_vicinity' already existing in the cube name"""
         self.cube.rename('probability_of_X_in_vicinity')
-        msg = "Cube name already contains 'in_vicinity'"
-        with self.assertRaisesRegex(ValueError, msg):
-            in_vicinity_name_format(self.cube.name())
+        result = in_vicinity_name_format(self.cube.name())
+        self.assertEqual(result, 'probability_of_X_in_vicinity')
 
 
 class Test_extract_diagnostic_name(IrisTest):
@@ -883,6 +888,13 @@ class Test_extract_diagnostic_name(IrisTest):
         result = extract_diagnostic_name(
             'probability_of_air_temperature_below_threshold')
         self.assertEqual(result, 'air_temperature')
+
+    def test_between_thresholds(self):
+        """Test correct name is returned from a probability between thresholds
+        """
+        result = extract_diagnostic_name(
+            'probability_of_visibility_in_air_between_thresholds')
+        self.assertEqual(result, 'visibility_in_air')
 
     def test_in_vicinity(self):
         """Test correct name is returned from an "in vicinity" probability.

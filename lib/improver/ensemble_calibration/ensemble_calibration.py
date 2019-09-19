@@ -33,14 +33,14 @@ This module defines all the "plugins" specific for ensemble calibration.
 
 """
 import datetime
-import numpy as np
-from scipy import stats
-from scipy.optimize import minimize
-from scipy.stats import norm
 import warnings
 
 import iris
 from iris.exceptions import CoordinateNotFoundError
+import numpy as np
+from scipy import stats
+from scipy.optimize import minimize
+from scipy.stats import norm
 
 from improver.ensemble_calibration.ensemble_calibration_utilities import (
     convert_cube_data_to_2d, check_predictor_of_mean_flag)
@@ -50,7 +50,7 @@ from improver.utilities.temporal import (
     iris_time_to_datetime)
 
 
-class ContinuousRankedProbabilityScoreMinimisers(object):
+class ContinuousRankedProbabilityScoreMinimisers():
     """
     Minimise the Continuous Ranked Probability Score (CRPS)
 
@@ -80,7 +80,7 @@ class ContinuousRankedProbabilityScoreMinimisers(object):
         Initialise class for performing minimisation of the Continuous
         Ranked Probability Score (CRPS).
 
-        Keyword Args:
+        Args:
             max_iterations (int):
                 The maximum number of iterations allowed until the
                 minimisation has converged to a stable solution. If the
@@ -96,7 +96,7 @@ class ContinuousRankedProbabilityScoreMinimisers(object):
         # depending upon the distribution requested.
         self.minimisation_dict = {
             "gaussian": self.calculate_normal_crps,
-            "truncated gaussian": self.calculate_truncated_normal_crps}
+            "truncated_gaussian": self.calculate_truncated_normal_crps}
         # Maximum iterations for minimisation using Nelder-Mead.
         self.max_iterations = max_iterations
 
@@ -259,14 +259,14 @@ class ContinuousRankedProbabilityScoreMinimisers(object):
             initial_guess (list):
                 List of optimised coefficients.
                 Order of coefficients is [gamma, delta, alpha, beta].
-            forecast_predictor (np.ndarray):
+            forecast_predictor (numpy.ndarray):
                 Data to be used as the predictor,
                 either the ensemble mean or the ensemble realizations.
-            truth (np.ndarray):
+            truth (numpy.ndarray):
                 Data to be used as truth.
-            forecast_var (np.ndarray):
+            forecast_var (numpy.ndarray):
                 Ensemble variance data.
-            sqrt_pi (np.ndarray):
+            sqrt_pi (numpy.ndarray):
                 Square root of Pi
             predictor_of_mean_flag (str):
                 String to specify the input to calculate the calibrated mean.
@@ -318,14 +318,14 @@ class ContinuousRankedProbabilityScoreMinimisers(object):
             initial_guess (list):
                 List of optimised coefficients.
                 Order of coefficients is [gamma, delta, alpha, beta].
-            forecast_predictor (np.ndarray):
+            forecast_predictor (numpy.ndarray):
                 Data to be used as the predictor,
                 either the ensemble mean or the ensemble realizations.
-            truth (np.ndarray):
+            truth (numpy.ndarray):
                 Data to be used as truth.
-            forecast_var (np.ndarray):
+            forecast_var (numpy.ndarray):
                 Ensemble variance data.
-            sqrt_pi (np.ndarray):
+            sqrt_pi (numpy.ndarray):
                 Square root of Pi
             predictor_of_mean_flag (str):
                 String to specify the input to calculate the calibrated mean.
@@ -366,7 +366,7 @@ class ContinuousRankedProbabilityScoreMinimisers(object):
         return result
 
 
-class EstimateCoefficientsForEnsembleCalibration(object):
+class EstimateCoefficientsForEnsembleCalibration():
     """
     Class focussing on estimating the optimised coefficients for ensemble
     calibration.
@@ -393,8 +393,6 @@ class EstimateCoefficientsForEnsembleCalibration(object):
                 The current cycle in YYYYMMDDTHHMMZ format e.g. 20171122T0100Z.
                 This is used to create a forecast_reference_time coordinate
                 on the resulting EMOS coefficients cube.
-
-        Keyword Args:
             desired_units (str or cf_units.Unit):
                 The unit that you would like the calibration to be undertaken
                 in. The current forecast, historical forecast and truth will be
@@ -413,9 +411,19 @@ class EstimateCoefficientsForEnsembleCalibration(object):
                 iterations may require increasing, as there will be
                 more coefficients to solve for.
 
+        Raises:
+            ValueError: If the given distribution is not valid.
+
         Warns:
             ImportWarning: If the statsmodels module can't be imported.
         """
+        valid_distributions = (ContinuousRankedProbabilityScoreMinimisers().
+                               minimisation_dict.keys())
+        if distribution not in valid_distributions:
+            msg = ("Given distribution {} not available. Available "
+                   "distributions are {}".format(
+                       distribution, valid_distributions))
+            raise ValueError(msg)
         self.distribution = distribution
         self.current_cycle = current_cycle
         self.desired_units = desired_units
@@ -506,7 +514,7 @@ class EstimateCoefficientsForEnsembleCalibration(object):
         if len(optimised_coeffs) != len(coeff_names):
             msg = ("The number of coefficients in {} must equal the "
                    "number of coefficient names {}.".format(
-                        optimised_coeffs, coeff_names))
+                       optimised_coeffs, coeff_names))
             raise ValueError(msg)
 
         coefficient_index = iris.coords.DimCoord(
@@ -633,8 +641,6 @@ class EstimateCoefficientsForEnsembleCalibration(object):
             estimate_coefficients_from_linear_model_flag (bool):
                 Flag whether coefficients should be estimated from
                 the linear regression, or static estimates should be used.
-
-        Keyword Args:
             no_of_realizations (int):
                 Number of realizations, if ensemble realizations are to be
                 used as predictors. Default is None.
@@ -702,6 +708,52 @@ class EstimateCoefficientsForEnsembleCalibration(object):
                                   no_of_realizations).tolist())
         return np.array(initial_guess, dtype=np.float32)
 
+    @staticmethod
+    def _filter_non_matching_cubes(historic_forecast, truth):
+        """
+        Provide filtering for the historic forecast and truth to make sure
+        that these contain matching validity times. This ensures that any
+        mismatch between the historic forecasts and truth is dealt with.
+
+        Args:
+            historic_forecast (iris.cube.Cube):
+                Cube of historic forecasts that potentially contains
+                a mismatch compared to the truth.
+            truth (iris.cube.Cube):
+                Cube of truth that potentially contains a mismatch
+                compared to the historic forecasts.
+
+        Returns:
+            (tuple): tuple containing
+                matching_historic_forecasts (iris.cube.Cube):
+                    Cube of historic forecasts where any mismatches with
+                    the truth cube have been removed.
+                matching_truths (iris.cube.Cube):
+                    Cube of truths where any mismatches with
+                    the historic_forecasts cube have been removed.
+
+        Raises:
+            ValueError: The filtering has found no matches in validity time
+                between the historic forecasts and the truths.
+
+        """
+        matching_historic_forecasts = iris.cube.CubeList([])
+        matching_truths = iris.cube.CubeList([])
+        for hf_slice in historic_forecast.slices_over("time"):
+            coord_values = (
+                {"time": iris_time_to_datetime(hf_slice.coord("time"))})
+            constr = iris.Constraint(coord_values=coord_values)
+            truth_slice = truth.extract(constr)
+            if truth_slice:
+                matching_historic_forecasts.append(hf_slice)
+                matching_truths.append(truth_slice)
+        if not matching_historic_forecasts and not matching_truths:
+            msg = ("The filtering has found no matches in validity time "
+                   "between the historic forecasts and the truths.")
+            raise ValueError(msg)
+        return (matching_historic_forecasts.merge_cube(),
+                matching_truths.merge_cube())
+
     def process(self, historic_forecast, truth):
         """
         Using Nonhomogeneous Gaussian Regression/Ensemble Model Output
@@ -710,21 +762,16 @@ class EstimateCoefficientsForEnsembleCalibration(object):
 
         The main contents of this method is:
 
-        1. Metadata checks to ensure that the current forecast, historic
-           forecast and truth exist in a form that can be processed.
-        2. Loop through times within the concatenated current forecast cube:
-
-           1. Extract the desired forecast period from the historic forecasts
-              to match the current forecasts. Apply unit conversion to ensure
-              that historic forecasts have the desired units for calibration.
-           2. Extract the relevant truth to co-incide with the time within
-              the historic forecasts. Apply unit conversion to ensure
-              that the truth has the desired units for calibration.
-           3. Calculate mean and variance.
-           4. Calculate initial guess at coefficient values by performing a
-              linear regression, if requested, otherwise default values are
-              used.
-           5. Perform minimisation.
+        1. Check that the predictor_of_mean_flag is valid.
+        2. Filter the historic forecasts and truth to ensure that these
+           inputs match in validity time.
+        3. Apply unit conversion to ensure that the historic forecasts and
+           truth have the desired units for calibration.
+        4. Calculate mean and variance.
+        5. Calculate initial guess at coefficient values by performing a
+           linear regression, if requested, otherwise default values are
+           used.
+        6. Perform minimisation.
 
         Args:
             historic_forecast (iris.cube.Cube):
@@ -750,6 +797,9 @@ class EstimateCoefficientsForEnsembleCalibration(object):
         # Set default values for whether there are NaN values within the
         # initial guess.
         nan_in_initial_guess = False
+
+        historic_forecast, truth = (
+            self._filter_non_matching_cubes(historic_forecast, truth))
 
         # Make sure inputs have the same units.
         if self.desired_units:
@@ -803,7 +853,7 @@ class EstimateCoefficientsForEnsembleCalibration(object):
         return coefficients_cube
 
 
-class ApplyCoefficientsFromEnsembleCalibration(object):
+class ApplyCoefficientsFromEnsembleCalibration():
     """
     Class to apply the optimised EMOS coefficients to future dates.
 
@@ -825,8 +875,6 @@ class ApplyCoefficientsFromEnsembleCalibration(object):
                 where the points of the coordinate are integer values and a
                 coefficient_name auxiliary coordinate where the points of
                 the coordinate are e.g. gamma, delta, alpha, beta.
-
-        Keyword Args:
             predictor_of_mean_flag (str):
                 String to specify the input to calculate the calibrated mean.
                 Currently the ensemble mean ("mean") and the ensemble
@@ -849,9 +897,9 @@ class ApplyCoefficientsFromEnsembleCalibration(object):
                            "and coefficients cube differs. "
                            "current forecast: {}, "
                            "coefficients cube: {}").format(
-                                coord_name,
-                                self.current_forecast.coord(coord_name),
-                                self.coefficients_cube.coord(coord_name))
+                               coord_name,
+                               self.current_forecast.coord(coord_name),
+                               self.coefficients_cube.coord(coord_name))
                     raise ValueError(msg)
             except CoordinateNotFoundError:
                 pass
@@ -867,8 +915,8 @@ class ApplyCoefficientsFromEnsembleCalibration(object):
                 msg = ("The domain along the {} axis given by the "
                        "current forecast {} does not match the domain given "
                        "by the coefficients cube {}.".format(
-                        axis, current_forecast_points,
-                        coefficients_cube.coord(axis=axis).bounds))
+                           axis, current_forecast_points,
+                           coefficients_cube.coord(axis=axis).bounds))
                 raise ValueError(msg)
 
         # Ensure predictor_of_mean_flag is valid.
@@ -991,124 +1039,3 @@ class ApplyCoefficientsFromEnsembleCalibration(object):
             optimised_coeffs["delta"]**2 * forecast_vars.data)
 
         return calibrated_forecast_predictor, calibrated_forecast_var
-
-
-class EnsembleCalibration(object):
-    """
-    Plugin to wrap the core EMOS processes:
-    1. Estimate optimised EMOS coefficients from training period.
-    2. Apply optimised EMOS coefficients for future dates.
-
-    """
-    def __init__(self, distribution, desired_units=None,
-                 predictor_of_mean_flag="mean", max_iterations=1000):
-        """
-        Create an ensemble calibration plugin that, for Nonhomogeneous Gaussian
-        Regression, calculates coefficients based on historical forecasts and
-        applies the coefficients to the current forecast.
-
-        Args:
-            distribution (str):
-                The distribution that will be used for calibration. This will
-                be dependent upon the input phenomenon. This has to be
-                supported by the minimisation functions in
-                ContinuousRankedProbabilityScoreMinimisers.
-
-        Keyword Args:
-            desired_units (str or cf_units.Unit):
-                The unit that you would like the calibration to be undertaken
-                in. The current forecast, historical forecast and truth will be
-                converted as required.
-            predictor_of_mean_flag (str):
-                String to specify the input to calculate the calibrated mean.
-                Currently the ensemble mean ("mean") and the ensemble
-                realizations ("realizations") are supported as the predictors.
-            max_iterations (int):
-                The maximum number of iterations allowed until the
-                minimisation has converged to a stable solution. If the
-                maximum number of iterations is reached, but the minimisation
-                has not yet converged to a stable solution, then the available
-                solution is used anyway, and a warning is raised. If the
-                predictor_of_mean is "realizations", then the number of
-                iterations may require increasing, as there will be
-                more coefficients to solve for.
-
-        Raises:
-            ValueError: If the given distribution is not valid.
-        """
-        valid_distributions = (ContinuousRankedProbabilityScoreMinimisers().
-                               minimisation_dict.keys())
-        if distribution not in valid_distributions:
-            msg = ("Given distribution {} not available. Available "
-                   "distributions are {}".format(
-                       distribution, valid_distributions))
-            raise ValueError(msg)
-        self.distribution = distribution
-        self.desired_units = desired_units
-        self.predictor_of_mean_flag = predictor_of_mean_flag
-        self.max_iterations = max_iterations
-
-    def __repr__(self):
-        """Represent the configured plugin instance as a string."""
-        result = ('<EnsembleCalibration: '
-                  'distribution: {}; '
-                  'desired_units: {}; '
-                  'predictor_of_mean_flag: {}; '
-                  'max_iterations: {}>')
-        return result.format(
-            self.distribution, self.desired_units,
-            self.predictor_of_mean_flag, self.max_iterations)
-
-    def process(self, current_forecast, historic_forecast, truth):
-        """
-        Performs ensemble calibration through the following steps:
-        1. Estimate optimised coefficients from training period.
-        2. Apply optimised coefficients to current forecast.
-
-        Args:
-            current_forecast (iris.cube.Cube):
-                The cube that provides the input forecast for
-                the current cycle.
-            historic_forecast (iris.cube.Cube):
-                The cube that provides the input historic forecasts
-                for calibration.
-            truth (iris.cube.Cube):
-                The cube that provides the input truth for
-                calibration with dates matching the historic forecasts.
-
-        Returns:
-            (tuple): tuple containing:
-                **calibrated_forecast_predictor** (iris.cube.Cube):
-                    Cube containing the calibrated forecast predictor.
-                **calibrated_forecast_variance** (iris.cube.Cube):
-                    Cube containing the calibrated forecast variance.
-
-        """
-        # Ensure predictor_of_mean_flag is valid.
-        check_predictor_of_mean_flag(self.predictor_of_mean_flag)
-
-        current_cycle = datetime_to_cycletime(
-            iris_time_to_datetime(
-                current_forecast.coord("forecast_reference_time"))[0])
-        ec = EstimateCoefficientsForEnsembleCalibration(
-            self.distribution, current_cycle=current_cycle,
-            desired_units=self.desired_units,
-            predictor_of_mean_flag=self.predictor_of_mean_flag,
-            max_iterations=self.max_iterations)
-        coefficient_cube = (
-            ec.process(
-                historic_forecast, truth))
-
-        ac = ApplyCoefficientsFromEnsembleCalibration(
-            current_forecast, coefficient_cube,
-            predictor_of_mean_flag=self.predictor_of_mean_flag)
-        (calibrated_forecast_predictor,
-         calibrated_forecast_variance) = ac.process()
-
-        # TODO: track down where np.float64 promotion takes place.
-        calibrated_forecast_predictor.data = (
-            calibrated_forecast_predictor.data.astype(np.float32))
-        calibrated_forecast_variance.data = (
-            calibrated_forecast_variance.data.astype(np.float32))
-
-        return calibrated_forecast_predictor, calibrated_forecast_variance

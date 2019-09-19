@@ -30,17 +30,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """Plugin to calculate blend weights and blend data across a dimension"""
 
-from improver.utilities.spatial import (
-    check_if_grid_is_equal_area, convert_distance_into_number_of_grid_cells)
-
-from improver.blending.weights import (
-    ChooseWeightsLinear, ChooseDefaultWeightsLinear,
-    ChooseDefaultWeightsNonLinear)
+from improver.blending.spatial_weights import (
+    SpatiallyVaryingWeightsFromMask)
 from improver.blending.weighted_blend import (
     MergeCubesForWeightedBlending, conform_metadata,
     WeightedBlendAcrossWholeDimension)
-from improver.blending.spatial_weights import (
-    SpatiallyVaryingWeightsFromMask)
+from improver.blending.weights import (
+    ChooseWeightsLinear, ChooseDefaultWeightsLinear,
+    ChooseDefaultWeightsNonLinear)
+from improver.utilities.spatial import (
+    check_if_grid_is_equal_area, convert_distance_into_number_of_grid_cells)
 
 
 class WeightAndBlend():
@@ -59,8 +58,6 @@ class WeightAndBlend():
                 for grid blending)
             wts_calc_method (str):
                 Weights calculation method ("linear", "nonlinear" or "dict")
-
-        Kwargs:
             weighting_coord (str):
                 Coordinate over which linear weights should be calculated (from
                 dictionary)
@@ -163,8 +160,6 @@ class WeightAndBlend():
         Args:
             cubelist (iris.cube.CubeList):
                 List of cubes to be merged and blended
-
-        Kwargs:
             cycletime (str):
                 Forecast reference time to use for output cubes, in the format
                 YYYYMMDDTHHMMZ.  If not set, the latest of the input cube

@@ -31,16 +31,16 @@
 """Class for Temporal Interpolation calculations."""
 
 from datetime import datetime, timedelta
-import numpy as np
 
 import iris
+import numpy as np
 from iris.exceptions import CoordinateNotFoundError
 
-from improver.utilities.temporal import iris_time_to_datetime
-from improver.utilities.solar import DayNightMask, calc_solar_elevation
 from improver.utilities.cube_manipulation import merge_cubes
+from improver.utilities.solar import DayNightMask, calc_solar_elevation
 from improver.utilities.spatial import (
     lat_lon_determine, transform_grid_to_lat_lon)
+from improver.utilities.temporal import iris_time_to_datetime
 
 
 class TemporalInterpolation(object):
@@ -57,7 +57,7 @@ class TemporalInterpolation(object):
         """
         Initialise class.
 
-        Keyword Args:
+        Args:
             interval_in_minutes (int):
                 Specifies the interval in minutes at which to interpolate
                 between the two input cubes. A number of minutes which does not
@@ -214,12 +214,12 @@ class TemporalInterpolation(object):
         Args:
             dtval (datetime.datetime):
                 Date and time.
-            lats (np.array):
+            lats (numpy.ndarray):
                 Array 2d of latitudes for each point
-            lons (np.array):
+            lons (numpy.ndarray):
                 Array 2d of longitudes for each point
         Returns:
-            sin_phi (np.array):
+            sin_phi (numpy.ndarray):
                 Array of sine of solar elevation at each point
 
         """
@@ -241,9 +241,9 @@ class TemporalInterpolation(object):
                 cube containing x and y axis
         Returns:
             (tuple) : tuple containing:
-                **lats** (np.array):
+                **lats** (numpy.ndarray):
                     2d Array of latitudes for each point.
-                **lons** (np.array):
+                **lons** (numpy.ndarray):
                     2d Array of longitudes for each point.
 
         """

@@ -34,8 +34,8 @@ import warnings
 
 import iris
 
-from improver.utilities.cube_checker import find_percentile_coordinate
 from improver.cube_combiner import CubeCombiner
+from improver.utilities.cube_checker import find_percentile_coordinate
 
 
 class WindGustDiagnostic(object):
@@ -114,6 +114,9 @@ class WindGustDiagnostic(object):
         Args:
             cube (iris.cube.Cube):
                 Cube containing the wind-gust diagnostic data.
+            perc_coord (iris.coords.Coord):
+                Percentile coordinate
+
         Returns:
             result (iris.cube.Cube):
                 Cube containing the wind-gust diagnostic data with

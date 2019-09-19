@@ -31,7 +31,9 @@
 """ Utilities to parse a list of constraints and extract matching subcube """
 
 from ast import literal_eval
+
 import iris
+
 from improver.utilities.cube_constraints import create_sorted_lambda_constraint
 
 
@@ -40,9 +42,9 @@ def create_range_constraint(coord_name, value):
     Create a constraint that is representative of a range.
 
     Args:
-        coord_name (string):
+        coord_name (str):
             Name of the coordinate for which the constraint will be created.
-        value (string):
+        value (str):
             A string containing the range information.
             It is assumed that the input value is of the form: "[2:10]".
 
@@ -62,7 +64,7 @@ def is_complex_parsing_required(value):
     Currently, this is solely determined by the presence of a colon (:).
 
     Args:
-        value (string):
+        value (str):
            A string that will be parsed.
 
     Returns:
@@ -91,8 +93,6 @@ def parse_constraint_list(constraints, units=None):
         constraints (list):
             List of string constraints with keys and values split by "=":
             e.g: ["kw1=val1", "kw2 = val2", "kw3=val3"].
-
-    Kwargs:
         units (list):
             List of units (as strings) corresponding to each coordinate in the
             list of constraints.  One or more "units" may be None, and units
@@ -158,9 +158,7 @@ def apply_extraction(cube, constraint, units=None):
         constraint (iris.Constraint or iris.ConstraintCombination):
             The constraint or ConstraintCombination that will be used to
             extract a subcube from the input cube.
-
-    Kwargs:
-        units (dictionary):
+        units (dict):
             A dictionary of units for the constraints. Supplied if any
             coordinate constraints are provided in different units from those
             of the input cube (eg precip in mm/h for cube threshold in m/s).
@@ -200,8 +198,6 @@ def extract_subcube(cube, constraints, units=None):
         constraints (list):
             List of string constraints with keys and values split by "=":
             e.g: ["kw1=val1", "kw2 = val2", "kw3=val3"].
-
-    Kwargs:
         units (list):
             List of units (as strings) corresponding to each coordinate in the
             list of constraints.  One or more "units" may be None, and units

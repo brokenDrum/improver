@@ -31,13 +31,12 @@
 
 """Spot data extraction from diagnostic fields using neighbour cubes."""
 
+import iris
 import numpy as np
 
-import iris
-from improver.utilities.cube_manipulation import (enforce_coordinate_ordering,
-                                                  compare_attributes)
-from improver.utilities.cube_metadata import create_coordinate_hash
 from improver.spotdata.build_spotdata_cube import build_spotdata_cube
+from improver.utilities.cube_manipulation import enforce_coordinate_ordering
+from improver.utilities.cube_metadata import create_coordinate_hash
 
 
 class SpotExtraction():
@@ -49,7 +48,7 @@ class SpotExtraction():
 
     def __init__(self, neighbour_selection_method='nearest'):
         """
-        Keyword Args:
+        Args:
             neighbour_selection_method (str):
                 The neighbour cube may contain one or several sets of grid
                 coordinates that match a spot site. These are determined by
@@ -114,7 +113,7 @@ class SpotExtraction():
             diagnostic_cube (iris.cube.Cube):
                 A cube of diagnostic data from which spot data is being taken.
         Returns:
-            spot_values (np.array):
+            spot_values (numpy.ndarray):
                 An array of diagnostic values at the grid coordinates found
                 within the coordinate cube.
         """
@@ -137,7 +136,7 @@ class SpotExtraction():
             diagnostic_cube (iris.cube.Cube):
                 The cube is needed to provide the name and units of the
                 diagnostic that is being processed.
-            spot_values (np.array):
+            spot_values (numpy.ndarray):
                 An array containing the diagnostic values extracted for the
                 required spot sites.
         Returns:

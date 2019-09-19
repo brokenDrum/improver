@@ -32,8 +32,8 @@
 
 
 import iris
-from iris.exceptions import CoordinateNotFoundError
 import numpy as np
+from iris.exceptions import CoordinateNotFoundError
 
 from improver.constants import DEFAULT_PERCENTILES
 from improver.utilities.cube_checker import find_percentile_coordinate
@@ -58,7 +58,7 @@ class PercentileConverter(object):
                 coordinate(s) will no longer be present on the output cube, as
                 it will have been replaced by the percentile coordinate.
 
-            percentiles (Iterable list of floats or None):
+            percentiles (Iterable list of float or None):
                 Percentile values at which to calculate; if not provided uses
                 DEFAULT_PERCENTILES. (optional)
 

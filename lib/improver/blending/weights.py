@@ -31,12 +31,11 @@
 """Module to create the weights used to blend data."""
 
 import copy
-import cf_units
 
+import cf_units
+import iris
 import numpy as np
 from scipy.interpolate import interp1d
-
-import iris
 
 from improver.utilities.cube_manipulation import (
     check_cube_coordinates, sort_coord_in_cube)
@@ -61,8 +60,6 @@ class WeightsUtilities:
             Args:
                 weights (numpy.ndarray):
                     array of weights
-
-            Keyword Args:
                 axis (int):
                     The axis that we want to normalise along for a multiple
                     dimensional array. Defaults to None, meaning the whole
@@ -157,8 +154,6 @@ class ChooseWeightsLinear:
                 an initial set of weights and information regarding the
                 points along the specified coordinate at which the weights are
                 valid. An example dictionary is shown below.
-
-        Keyword Args:
             config_coord_name (str):
                 Name of the coordinate used to select the configuration.
                 For example, if the intention is to create weights that scale
@@ -235,15 +230,15 @@ class ChooseWeightsLinear:
         Returns:
             (tuple): tuple containing
 
-                **source_points** (np.ndarray):
+                **source_points** (numpy.ndarray):
                     Points within the configuration dictionary that will
                     be used as the input to the interpolation.
 
-                **target_points** (np.ndarray):
+                **target_points** (numpy.ndarray):
                     Points within the cube that will be the target points
                     for the interpolation.
 
-                **source_weights** (np.ndarray):
+                **source_weights** (numpy.ndarray):
                     Weights from the configuration dictionary that will be
                     used as the input to the interpolation.
 
@@ -281,26 +276,24 @@ class ChooseWeightsLinear:
         source_weights can be a multi-dimensional numpy array.
 
         Args:
-            source_points (np.ndarray):
+            source_points (numpy.ndarray):
                 Points within the configuration dictionary that will
                 be used as the input to the interpolation.
-            target_points (np.ndarray):
+            target_points (numpy.ndarray):
                 Points within the cube that will be the target points
                 for the interpolation.
-            source_weights (np.ndarray):
+            source_weights (numpy.ndarray):
                 Weights from the configuration dictionary that will be
                 used as the input to the interpolation.
             fill_value (tuple):
                 Values to be used if extrapolation is required. The
                 fill values are used for target_points that are outside
                 the source_points grid.
-
-        Keyword Args:
             axis (int):
                 Axis along which the interpolation will occur.
 
         Returns:
-            weights (np.ndarray):
+            weights (numpy.ndarray):
                 Weights corresponding to target_points following interpolation.
         """
         f_out = interp1d(source_points, source_weights, axis=axis,
@@ -317,7 +310,7 @@ class ChooseWeightsLinear:
             cube (iris.cube.Cube):
                 Cube containing the coordinate information that will be used
                 for setting up the new_weights_cube.
-            weights (np.ndarray):
+            weights (numpy.ndarray):
                 Weights calculated following interpolation.
 
         Returns:
@@ -506,7 +499,7 @@ class ChooseDefaultWeightsLinear:
         """Create linear weights
 
             Args:
-                num_of_weights (positive integer):
+                num_of_weights (positive int):
                     Number of weights to create.
 
             Returns:
@@ -625,8 +618,6 @@ class ChooseDefaultWeightsNonLinear:
                 Cube to be blended across the coord.
             coord_name (str):
                 Name of coordinate in the cube to be blended.
-
-        Kwargs:
             inverse_ordering (bool):
                 The input cube blend coordinate will be in ascending order,
                 so that calculated blend weights decrease with increasing

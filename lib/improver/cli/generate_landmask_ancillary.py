@@ -31,9 +31,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """Script to run landmask ancillary generation."""
 
-from improver.argparser import ArgParser
 import os
 
+from improver.argparser import ArgParser
 from improver.generate_ancillaries.generate_ancillary import (
     CorrectLandSeaMask)
 from improver.utilities.load import load_cube
@@ -59,11 +59,34 @@ def main(argv=None):
 
     # Check if improver ancillary already exists.
     if not os.path.exists(args.output_filepath) or args.force:
+        # Load Cube
         landmask = load_cube(args.input_filepath_standard)
-        land_binary_mask = CorrectLandSeaMask().process(landmask)
+
+        # Process Cube
+        land_binary_mask = process(landmask)
+
+        # Save Cube
         save_netcdf(land_binary_mask, args.output_filepath)
     else:
         print('File already exists here: ', args.output_filepath)
+
+
+def process(landmask):
+    """Runs landmask ancillary generation.
+
+    Read in the interpolated landmask and round
+    values < 0.5 to False
+    values >= 0.5 to True.
+
+    Args:
+        landmask (iris.cube.Cube):
+            Cube to process
+
+    Returns:
+        (iris.cube.Cube):
+            A cube landmask of boolean values.
+    """
+    return CorrectLandSeaMask().process(landmask)
 
 
 if __name__ == "__main__":
