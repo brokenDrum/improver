@@ -59,4 +59,5 @@ fi
 # Put our library and scripts in the paths.
 export PATH="$IMPROVER_DIR/bin/:$PATH"
 export PYTHONPATH="$IMPROVER_DIR/:${PYTHONPATH:-}"
-exec python3 -vvvv -m improver.cli "$@"
+export PYTHONVERBOSE=2
+exec python3 -m improver.cli "$@"
